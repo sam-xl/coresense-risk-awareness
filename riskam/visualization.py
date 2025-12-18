@@ -29,19 +29,13 @@ plt.rcParams.update(
 
 
 def visualize_risk(
-    image_path: str,
-    output_path: str | None,
+    image,
     bboxes: list[tuple[int, int, int, int]],
     rel_depth: np.ndarray,
     risk_features: dict[str, np.ndarray],
     risk_score: float,
     max_risk_idx: int,
 ):
-    # Load the image
-    image = cv2.imread(image_path)
-    if image is None:
-        raise FileNotFoundError(f"Image not found: {image_path}")
-
     # Add rel_depth overlay: closest pixels remain as-is and further ones fade to dark gray
     # Normalize rel_depth to range [0,1]
     norm_depth = (rel_depth - rel_depth.min()) / (
@@ -64,11 +58,11 @@ def visualize_risk(
         x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)
         gaze_score = risk_features["gaze"][i]
         if gaze_score == 0:
-            color = (0, 0, 255)  # red
+            color = (255, 0, 0)  # red (changed from BGR to RGB)
         elif gaze_score == 1:
-            color = (0, 255, 0)  # green
+            color = (0, 255, 0)  # green (changed from BGR to RGB)
         else:
-            color = (0, 255, 255)  # yellow
+            color = (255, 255, 0)  # yellow (changed from BGR to RGB)
         cv2.rectangle(image, (x1, y1), (x2, y2), color, 2)
 
     # Add risk score overlay in the top right corner
@@ -90,13 +84,13 @@ def visualize_risk(
     )
     # Determine text color based on RISK_SCORE_BREAKPOINTS
     if risk_score == RISK_SCORE_BREAKPOINTS[0]:
-        score_color = (255, 200, 150)  # light blue
+        score_color = (150, 200, 255)  # light blue (Changed from BGR to RGB)
     elif risk_score <= RISK_SCORE_BREAKPOINTS[1]:
-        score_color = (0, 255, 0)  # green
+        score_color = (0, 255, 0)  # green (Changed from BGR to RGB)
     elif risk_score <= RISK_SCORE_BREAKPOINTS[2]:
-        score_color = (0, 255, 255)  # yellow
+        score_color = (255, 255, 0)  # yellow (Changed from BGR to RGB)
     else:
-        score_color = (0, 0, 255)  # red
+        score_color = (255, 0, 0)  # red (Changed from BGR to RGB)
     cv2.putText(
         image,
         text,
@@ -141,17 +135,7 @@ def visualize_risk(
             thickness,
             cv2.LINE_AA,
         )
-
-    if output_path is None:
-        # Show on screen
-        cv2.imshow("Risk Visualization", image)
-        cv2.waitKey(0)
-        cv2.destroyAllWindows()
-    else:
-        # Ensure directory exists and save image
-        out_path = Path(output_path)
-        out_path.parent.mkdir(parents=True, exist_ok=True)
-        cv2.imwrite(str(out_path), image)
+    return image
 
 
 def visualize_exp_results(dataset: str) -> None:
